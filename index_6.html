@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DBSentry — Oracle Performance & Stress Testing Platform</title>
+<meta name="description" content="Stress-test, benchmark, and diagnose Oracle databases with guardrails that refuse the risky move by default.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23E30000'/%3E%3Cellipse cx='12' cy='7' rx='6' ry='2.2' fill='none' stroke='white' stroke-width='1.6'/%3E%3Cpath d='M6 7v9c0 1.3 2.7 2.2 6 2.2s6-.9 6-2.2V7' fill='none' stroke='white' stroke-width='1.6'/%3E%3Cpath d='M6 12.5c0 1.3 2.7 2.2 6 2.2s6-.9 6-2.2' fill='none' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E">
+
+<!-- Open Graph / Twitter Card: og:image points at a placeholder path.
+     Replace with an absolute URL to a real hosted screenshot (e.g.
+     https://yourdomain.com/og-image.png, 1200x630) once this page is
+     deployed — social platforms fetch this externally, a data URI or
+     relative path won't render in link previews. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="DBSentry — Oracle Performance & Stress Testing Platform">
+<meta property="og:description" content="Stress-test, benchmark, and diagnose Oracle databases with guardrails that refuse the risky move by default.">
+<meta property="og:image" content="/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DBSentry — Oracle Performance & Stress Testing Platform">
+<meta name="twitter:description" content="Stress-test, benchmark, and diagnose Oracle databases with guardrails that refuse the risky move by default.">
+<meta name="twitter:image" content="/og-image.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0A0C10;
+    --panel: #12151C;
+    --panel-2: #171B24;
+    --line: rgba(255,255,255,0.08);
+    --line-strong: rgba(255,255,255,0.14);
+    --red: #E30000;
+    --red-bright: #FF3333;
+    --red-deep: #7A0000;
+    --red-glow: rgba(227,0,0,0.35);
+    --text: #EAECEF;
+    --text-dim: #8B93A5;
+    --text-faint: #7B8394;
+    --green: #22C55E;
+    --amber: #F59E0B;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--ink); color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-image:
+      linear-gradient(rgba(227,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(227,0,0,0.03) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+  h1, h2, h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; margin: 0; letter-spacing: -0.01em; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  a { color: inherit; }
+  img, svg { display: block; }
+  ::selection { background: var(--red); color: #fff; }
+  :focus-visible { outline: 2px solid var(--red); outline-offset: 3px; border-radius: 4px; }
+
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,12,16,0.82); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.02rem; text-decoration: none; }
+  .brand-mark {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--red), var(--red-deep));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 16px var(--red-glow);
+  }
+  .brand-mark svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .navlinks { display: flex; gap: 32px; font-size: 0.88rem; color: var(--text-dim); }
+  .navlinks a { text-decoration: none; transition: color 160ms ease; }
+  .navlinks a:hover { color: var(--text); }
+  .nav-cta {
+    font-size: 0.84rem; font-weight: 700; color: #fff;
+    background: linear-gradient(180deg, #EA0000, var(--red));
+    padding: 9px 18px; border-radius: 8px; text-decoration: none;
+    box-shadow: 0 2px 10px -2px var(--red-glow);
+  }
+  .desktop-only { display: inline-flex; }
+  .nav-burger {
+    display: none; background: none; border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px; cursor: pointer;
+  }
+  .nav-burger svg { width: 20px; height: 20px; stroke: var(--text); fill: none; stroke-width: 2; stroke-linecap: round; }
+  .mobile-nav {
+    display: none; flex-direction: column; gap: 2px; padding: 10px 28px 18px;
+    border-top: 1px solid var(--line); background: rgba(10,12,16,0.98);
+  }
+  .mobile-nav.is-open { display: flex; }
+  .mobile-nav a {
+    text-decoration: none; color: var(--text-dim); font-size: 0.92rem; padding: 12px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .mobile-nav a.nav-cta { color: #fff; text-align: center; border-radius: 8px; border-bottom: none; margin-top: 10px; }
+  @media (max-width: 780px) {
+    .navlinks { display: none; }
+    .desktop-only { display: none; }
+    .nav-burger { display: flex; align-items: center; justify-content: center; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero { padding: 88px 0 96px; }
+  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 56px; align-items: center; }
+  @media (min-width: 980px) { .hero-grid { grid-template-columns: 1fr 1fr; } }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text-dim); background: var(--panel); border: 1px solid var(--line);
+    padding: 7px 13px; border-radius: 100px; margin-bottom: 22px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  .hero h1 { font-size: clamp(2.1rem, 4.4vw, 3.35rem); font-weight: 700; line-height: 1.08; }
+  .hero h1 em { font-style: normal; color: var(--red); }
+  .hero p.lede { font-size: 1.08rem; color: var(--text-dim); line-height: 1.6; margin: 22px 0 32px; max-width: 46ch; }
+
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary, .btn-secondary {
+    font-size: 0.92rem; font-weight: 700; padding: 13px 24px; border-radius: 10px;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform 140ms ease, filter 160ms ease, background 160ms ease;
+  }
+  .btn-primary { color: #fff; background: linear-gradient(180deg, #EA0000, var(--red)); box-shadow: 0 4px 18px -4px var(--red-glow); }
+  .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.06); }
+  .btn-secondary { color: var(--text); background: var(--panel); border: 1px solid var(--line-strong); }
+  .btn-secondary:hover { background: var(--panel-2); }
+
+  /* ---- Terminal signature element ---- */
+  .terminal {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: 0 24px 64px -24px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+  .terminal-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel-2);
+  }
+  .terminal-bar .tdot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-bar .tdot:nth-child(1) { background: #FF5F57; }
+  .terminal-bar .tdot:nth-child(2) { background: #FEBC2E; }
+  .terminal-bar .tdot:nth-child(3) { background: #28C840; }
+  .terminal-bar span { margin-left: 10px; font-size: 0.72rem; color: var(--text-faint); }
+  .terminal-body {
+    padding: 20px 22px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    line-height: 1.85; min-height: 300px; white-space: pre-wrap; word-break: break-word;
+  }
+  .terminal-body .prompt { color: var(--text-faint); }
+  .terminal-body .ok { color: var(--green); }
+  .terminal-body .warn { color: var(--amber); }
+  .terminal-body .fail { color: #FF5C5C; }
+  .terminal-body .dim { color: var(--text-faint); }
+  .caret { display: inline-block; width: 7px; height: 15px; background: var(--red); vertical-align: -2px; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .terminal-scenarios { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .tscenario {
+    font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600;
+    color: var(--text-dim); background: var(--panel); border: 1px solid var(--line);
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: all 160ms ease;
+  }
+  .tscenario:hover { color: var(--text); border-color: var(--line-strong); }
+  .tscenario.is-active { color: #fff; background: linear-gradient(180deg, #EA0000, var(--red)); border-color: transparent; }
+
+  /* ---------- SECTION SHARED ---------- */
+  section { padding: 88px 0; }
+  .section-head { max-width: 640px; margin-bottom: 48px; }
+  .section-kicker { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red-bright); margin-bottom: 12px; }
+  .section-head h2 { font-size: clamp(1.6rem, 3vw, 2.15rem); font-weight: 700; line-height: 1.2; }
+  .section-head p { color: var(--text-dim); font-size: 1rem; margin-top: 14px; line-height: 1.65; }
+
+  hr.rule { border: none; border-top: 1px solid var(--line); margin: 0; }
+
+  /* ---------- PRODUCTS ---------- */
+  .products-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 780px) { .products-grid { grid-template-columns: 1fr 1fr; } }
+  .product-card {
+    border-radius: 16px; padding: 28px 26px; border: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .product-card.is-live {
+    background: linear-gradient(165deg, var(--panel), var(--panel-2));
+    border-color: var(--line-strong);
+    box-shadow: 0 20px 48px -24px var(--red-glow);
+  }
+  .product-card.is-upcoming {
+    background: var(--panel); opacity: 0.82;
+    border-style: dashed;
+  }
+  .product-status {
+    display: inline-flex; align-items: center; gap: 7px; width: fit-content;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 5px 11px; border-radius: 100px;
+  }
+  .status-live { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.28); }
+  .status-live .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-upcoming { background: rgba(139,147,165,0.1); color: var(--text-dim); border: 1px solid var(--line-strong); }
+  .status-upcoming .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); }
+  .product-card h3 { font-size: 1.15rem; font-weight: 700; }
+  .product-card p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.6; margin: 0; flex-grow: 1; }
+  .product-link {
+    font-size: 0.86rem; font-weight: 700; color: var(--red-bright); text-decoration: none; width: fit-content;
+  }
+  .product-link:hover { text-decoration: underline; }
+  .product-link.is-disabled { color: var(--text-faint); cursor: default; }
+
+  /* ---------- MODULES ---------- */
+  .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .module-card { background: var(--panel); padding: 26px 24px; transition: background 160ms ease; }
+  .module-card:hover { background: var(--panel-2); }
+  .module-icon {
+    width: 38px; height: 38px; border-radius: 10px; margin-bottom: 16px;
+    background: rgba(227,0,0,0.1); border: 1px solid rgba(227,0,0,0.2);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .module-icon svg { width: 18px; height: 18px; stroke: var(--red); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .module-card h3 { font-size: 0.98rem; font-weight: 700; margin-bottom: 8px; }
+  .module-card p { font-size: 0.86rem; color: var(--text-dim); line-height: 1.55; margin: 0; }
+
+  .module-card.is-dev { position: relative; }
+  .module-card.is-dev .module-icon,
+  .module-card.is-dev h3,
+  .module-card.is-dev p {
+    filter: blur(3.5px); user-select: none; pointer-events: none;
+  }
+  .module-dev-overlay {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,12,16,0.35);
+  }
+  .module-dev-overlay span {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    color: #fff; background: rgba(227,0,0,0.85); border: 1px solid rgba(255,255,255,0.2);
+    padding: 7px 16px; border-radius: 100px; box-shadow: 0 4px 16px -2px rgba(0,0,0,0.4);
+  }
+
+  /* ---------- GALLERY ---------- */
+  .gallery-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .gtab {
+    font-family: 'Inter', sans-serif; font-size: 0.84rem; font-weight: 600;
+    color: var(--text-dim); background: var(--panel); border: 1px solid var(--line);
+    padding: 9px 16px; border-radius: 8px; cursor: pointer; transition: all 160ms ease;
+  }
+  .gtab:hover { color: var(--text); border-color: var(--line-strong); }
+  .gtab.is-active { color: #fff; background: linear-gradient(180deg, #EA0000, var(--red)); border-color: transparent; }
+
+  .gallery-frame {
+    border-radius: 14px; overflow: hidden; border: 1px solid var(--line);
+    box-shadow: 0 24px 64px -24px rgba(0,0,0,0.6);
+  }
+  .gframe-bar {
+    display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+    background: var(--panel-2); border-bottom: 1px solid var(--line);
+  }
+  .gframe-bar .tdot { width: 10px; height: 10px; border-radius: 50%; }
+  .gframe-bar .tdot:nth-child(1) { background: #FF5F57; }
+  .gframe-bar .tdot:nth-child(2) { background: #FEBC2E; }
+  .gframe-bar .tdot:nth-child(3) { background: #28C840; }
+  .gframe-url { margin-left: 10px; font-size: 0.74rem; color: var(--text-faint); }
+
+  /* The mockups themselves recreate the real product's LIGHT theme —
+     scoped tokens below so they never leak into this page's dark theme. */
+  .gframe-body {
+    --p-bg: #F3F5F8; --p-card: #FFFFFF; --p-border: rgba(15,23,42,0.08);
+    --p-text: #0F172A; --p-text-muted: #475569; --p-text-faint: #5D6B85;
+    --p-primary: #E30000; --p-success: #22C55E; --p-success-soft: #DCFCE7;
+    --p-danger: #EF4444; --p-danger-soft: #FEE2E2; --p-warn: #F59E0B; --p-warn-soft: #FEF3C7;
+    background: var(--p-bg); padding: 28px; min-height: 340px;
+  }
+  .gpane { display: none; }
+  .gpane.is-active { display: block; animation: fadeUp 260ms ease; }
+
+  .g-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .g-kpi {
+    background: var(--p-card); border: 1px solid var(--p-border); border-radius: 12px;
+    padding: 16px 18px; color: var(--p-text);
+  }
+  .g-kpi-gauge { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+  .g-kpi-label { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--p-text-faint); margin-bottom: 6px; }
+  .g-kpi-value { font-size: 1.15rem; font-weight: 700; color: var(--p-text); }
+  .g-hint { font-size: 0.72rem; color: var(--p-text-faint); margin-top: 4px; display: block; }
+  .g-badge { font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 6px; display: inline-block; margin-top: 6px; }
+  .g-badge-ok { background: var(--p-success-soft); color: #166534; }
+  .g-badge-fail { background: var(--p-danger-soft); color: #991B1B; }
+
+  .g-checklist { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .g-check-item {
+    background: var(--p-card); border: 1px solid var(--p-border); border-left: 3px solid transparent;
+    border-radius: 10px; padding: 14px 16px; display: flex; gap: 12px; color: var(--p-text); font-size: 0.84rem;
+  }
+  .g-check-item strong { display: block; margin-bottom: 2px; }
+  .g-check-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .g-ok { border-left-color: var(--p-success); } .g-ok .g-check-dot { background: var(--p-success); }
+  .g-warn { border-left-color: var(--p-warn); } .g-warn .g-check-dot { background: var(--p-warn); }
+  .g-fail { border-left-color: var(--p-danger); } .g-fail .g-check-dot { background: var(--p-danger); }
+
+  .g-table { width: 100%; border-collapse: collapse; background: var(--p-card); border: 1px solid var(--p-border); border-radius: 10px; overflow: hidden; color: var(--p-text); font-size: 0.84rem; }
+  .g-table th { text-align: left; padding: 11px 14px; background: rgba(15,23,42,0.03); color: var(--p-text-faint); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; }
+  .g-table td { padding: 11px 14px; border-top: 1px solid var(--p-border); }
+
+  .g-metric-strip { display: flex; gap: 12px; margin-bottom: 16px; }
+  .g-metric-chip { background: var(--p-card); border: 1px solid var(--p-border); border-left: 3px solid var(--p-success); border-radius: 10px; padding: 12px 16px; }
+  .g-metric-chip.g-metric-warn { border-left-color: var(--p-warn); }
+
+  /* ---------- GUARDRAILS (signature differentiator) ---------- */
+  .guardrails-band { background: var(--panel); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .guardrails-list { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  @media (min-width: 780px) { .guardrails-list { grid-template-columns: 1fr 1fr; } }
+  .guardrail-item { background: var(--ink); padding: 22px 24px; display: flex; gap: 16px; }
+  .guardrail-check {
+    width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; margin-top: 2px;
+    background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .guardrail-check svg { width: 12px; height: 12px; stroke: var(--green); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .guardrail-item h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 5px; }
+  .guardrail-item p { font-size: 0.84rem; color: var(--text-dim); line-height: 1.55; margin: 0; }
+
+  /* ---------- SPECS STRIP ---------- */
+  .specs-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  @media (min-width: 780px) { .specs-strip { grid-template-columns: repeat(4, 1fr); } }
+  .spec-cell { background: var(--panel); padding: 30px 22px; text-align: center; }
+  .spec-num { font-family: 'JetBrains Mono', monospace; font-size: 2.1rem; font-weight: 700; color: var(--red); }
+  .spec-label { font-size: 0.78rem; color: var(--text-dim); margin-top: 8px; line-height: 1.4; }
+
+  /* ---------- CTA FOOTER ---------- */
+  .cta-band { text-align: center; padding: 100px 0; }
+  .cta-band h2 { font-size: clamp(1.7rem, 3.6vw, 2.5rem); max-width: 20ch; margin: 0 auto 18px; }
+  .cta-band p { color: var(--text-dim); max-width: 48ch; margin: 0 auto 32px; line-height: 1.6; }
+
+  .quickstart {
+    max-width: 460px; margin: 0 auto 32px; text-align: left; border-radius: 12px;
+    overflow: hidden; border: 1px solid var(--line); background: var(--panel);
+  }
+  .quickstart-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: var(--panel-2); border-bottom: 1px solid var(--line);
+    font-size: 0.74rem; color: var(--text-faint);
+  }
+  .copy-btn {
+    font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 700;
+    color: var(--text-dim); background: transparent; border: 1px solid var(--line-strong);
+    padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 160ms ease;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--text-dim); }
+  .copy-btn.is-copied { color: var(--green); border-color: var(--green); }
+  .quickstart pre { margin: 0; padding: 18px 20px; font-size: 0.82rem; line-height: 1.8; color: var(--text); overflow-x: auto; }
+
+  footer { border-top: 1px solid var(--line); padding: 32px 0; }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--text-faint); }
+
+  /* ---------- SCROLL REVEAL ---------- */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 620ms ease, transform 620ms ease; }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .caret { animation: none; }
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <span class="brand-mark"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg></span>
+      DBSentry
+    </a>
+    <div class="navlinks">
+      <a href="#products">Products</a>
+      <a href="#modules">Modules</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#guardrails">Guardrails</a>
+      <a href="#specs">Specs</a>
+    </div>
+    <a class="nav-cta desktop-only" href="#get-started">Get Started</a>
+    <button class="nav-burger" id="navBurger" aria-label="Toggle menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#products">Products</a>
+    <a href="#modules">Modules</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#guardrails">Guardrails</a>
+    <a href="#specs">Specs</a>
+    <a class="nav-cta" href="#get-started">Get Started</a>
+  </div>
+</nav>
+
+<header id="top" class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> Built for the on-call DBA</div>
+      <h1>Stress-test Oracle. <em>Without</em> waking up production.</h1>
+      <p class="lede">
+        DBSentry runs load, benchmarks, and diagnostics against Oracle — and refuses the risky move by
+        default. PROD is hard-blocked. Writes are opt-in. Every metric is labeled for what it actually is.
+      </p>
+      <div class="hero-ctas">
+        <a class="btn-primary" href="#get-started">Get Started</a>
+        <a class="btn-secondary" href="#guardrails">Read the guardrails</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="terminal" role="img" aria-label="Simulated DBSentry terminal output">
+        <div class="terminal-bar">
+          <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+          <span class="mono" id="termLabel">dbsentry — health check</span>
+        </div>
+        <div class="terminal-body mono" id="termBody"></div>
+      </div>
+      <div class="terminal-scenarios">
+        <button class="tscenario is-active" data-scenario="health">Health Check</button>
+        <button class="tscenario" data-scenario="blocked">Benchmark on PROD</button>
+        <button class="tscenario" data-scenario="heavyjob">Heavy Job gate</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<hr class="rule">
+
+<section id="products">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-kicker">The suite</div>
+      <h2>Two products. One Oracle platform.</h2>
+      <p>DBSentry is built as a suite, shipped one product at a time — starting with the half that answers "is it safe to push this."</p>
+    </div>
+
+    <div class="products-grid reveal">
+      <div class="product-card is-live">
+        <div class="product-status status-live"><span class="dot"></span> Available now</div>
+        <h3>DBSentry Performance Platform</h3>
+        <p>Load testing, benchmarking, health checks, and diagnosis — with guardrails that refuse the risky move by default. Everything on this page below is this product.</p>
+        <a class="product-link" href="#modules">See the modules ↓</a>
+      </div>
+      <div class="product-card is-upcoming">
+        <div class="product-status status-upcoming"><span class="dot"></span> Coming soon</div>
+        <h3>DBSentry Data Recovery Platform</h3>
+        <p>The recovery half of the suite — backup and restore confidence for Oracle. Still in development; details land here once it's real, not before.</p>
+        <span class="product-link is-disabled">Details coming soon</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<section id="modules">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-kicker">Modules</div>
+      <h2>One tool, the whole pre-flight to post-mortem loop.</h2>
+      <p>Every module below runs against a connection you configure once — no separate credentials to juggle, no separate tool to learn.</p>
+    </div>
+
+    <div class="modules-grid reveal">
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path></svg></div>
+        <h3>Load Test</h3>
+        <p>Custom query slots with bind variables. App-side TPS and p50/p95/p99 latency, not just what the DB reports.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg></div>
+        <h3>Benchmark Suite</h3>
+        <p>15 locked, repeatable definitions. Warm-up discarded, fixed seed, median/min/max/CV across reps.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg></div>
+        <h3>Transaction Simulator</h3>
+        <p>Virtual OLTP and OLAP users, each its own session identity — visible in GV$SESSION as real app traffic.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div>
+        <h3>Heavy Jobs</h3>
+        <p>Full scans, hash joins, bulk loads. Every job passes an EXPLAIN PLAN cost gate before it's allowed to run.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M4.8 2.3A.7.7 0 0 1 6 2h12a.7.7 0 0 1 .8.3l1 8h-15z"></path><path d="M2 22v-9h20v9"></path></svg></div>
+        <h3>Health Check</h3>
+        <p>FRA, TEMP, ASM, RAC, redo, and more at a glance — and a mandatory gate before anything high-risk runs.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+        <h3>Block Check</h3>
+        <p>Surfaces corruption already recorded by RMAN — and says so plainly when nothing has ever been validated.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
+        <h3>Live Monitoring</h3>
+        <p>Real-time wait events and active sessions, sampled live — not a cached snapshot from ten minutes ago.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg></div>
+        <h3>Differential Diagnosis</h3>
+        <p>Ranked hypotheses from wait-event evidence, each with a confidence score and what would refute it.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg></div>
+        <h3>PM Tools</h3>
+        <p>Parses an AWR Miner file you already have into a dashboard and report. Never queries a licensed view itself.</p>
+      </div>
+      <div class="module-card">
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></div>
+        <h3>Reports</h3>
+        <p>Shareable HTML or PDF. Every section states its own limitations instead of quietly hiding them.</p>
+      </div>
+
+      <div class="module-card is-dev">
+        <div class="module-dev-overlay"><span>On Development</span></div>
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="M18 17V9M13 17V5M8 17v-4"></path></svg></div>
+        <h3>Gather Stats</h3>
+        <p>Schema or full-database statistics gathering, scheduled or on demand, with before/after comparison.</p>
+      </div>
+      <div class="module-card is-dev">
+        <div class="module-dev-overlay"><span>On Development</span></div>
+        <div class="module-icon"><svg viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35"></path><circle cx="10" cy="10" r="7"></circle><path d="M10 6v4l3 2"></path></svg></div>
+        <h3>SQL Advisor</h3>
+        <p>SQL ID-level tuning analysis in the spirit of SQLT — read as clean charts instead of a wall of text.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<section id="gallery">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-kicker">See it in action</div>
+      <h2>What the screens actually look like.</h2>
+      <p>Recreated with dummy data — no connection needed to look around. This is the same light UI the real product uses, not a marketing-only mockup.</p>
+    </div>
+
+    <div class="gallery-tabs reveal" role="tablist">
+      <button class="gtab is-active" data-target="g-dashboard" role="tab" aria-selected="true">Dashboard</button>
+      <button class="gtab" data-target="g-health" role="tab" aria-selected="false">Health Check</button>
+      <button class="gtab" data-target="g-benchmark" role="tab" aria-selected="false">Benchmark</button>
+      <button class="gtab" data-target="g-block" role="tab" aria-selected="false">Block Check</button>
+    </div>
+
+    <div class="gallery-frame reveal">
+      <div class="gframe-bar">
+        <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+        <span class="gframe-url mono">dbsentry.local — demo data, not connected</span>
+      </div>
+
+      <div class="gframe-body">
+
+        <!-- Dashboard mockup -->
+        <div class="gpane is-active" id="g-dashboard">
+          <div class="g-kpi-grid">
+            <div class="g-kpi"><div class="g-kpi-label">Connection Status</div><div class="g-kpi-value">Connected</div><span class="g-badge g-badge-ok">● Online</span></div>
+            <div class="g-kpi"><div class="g-kpi-label">DB Connection Latency</div><div class="g-kpi-value mono">42.3 ms</div></div>
+            <div class="g-kpi"><div class="g-kpi-label">RAC Instances</div><div class="g-kpi-value mono">2</div></div>
+            <div class="g-kpi"><div class="g-kpi-label">Data Guard</div><div class="g-kpi-value">PRIMARY</div></div>
+            <div class="g-kpi g-kpi-gauge">
+              <svg viewBox="0 0 100 100" width="72" height="72">
+                <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" stroke="rgba(15,23,42,0.08)"></circle>
+                <circle cx="50" cy="50" r="40" stroke-width="8" fill="none" stroke="#22C55E" stroke-dasharray="251.3" stroke-dashoffset="177" stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
+                <text x="50" y="56" text-anchor="middle" font-size="18" font-weight="700" fill="#0F172A">30%</text>
+              </svg>
+              <div class="g-kpi-label">FRA Usage</div>
+            </div>
+            <div class="g-kpi"><div class="g-kpi-label">Highest Tablespace Usage</div><div class="g-kpi-value mono">64.2%</div><span class="g-hint">ADMIN_TBS</span></div>
+          </div>
+        </div>
+
+        <!-- Health Check mockup -->
+        <div class="gpane" id="g-health">
+          <div class="g-checklist">
+            <div class="g-check-item g-ok"><span class="g-check-dot"></span><div><strong>Archive Log Mode</strong><div class="g-hint">Enabled — ARCHIVELOG</div></div></div>
+            <div class="g-check-item g-ok"><span class="g-check-dot"></span><div><strong>FRA Usage</strong><div class="g-hint">29.5% used — healthy</div></div></div>
+            <div class="g-check-item g-warn"><span class="g-check-dot"></span><div><strong>Tablespace ADMIN_TBS</strong><div class="g-hint">70.1% used of max</div></div></div>
+            <div class="g-check-item g-ok"><span class="g-check-dot"></span><div><strong>RAC Instances</strong><div class="g-hint">2 / 2 online</div></div></div>
+            <div class="g-check-item g-ok"><span class="g-check-dot"></span><div><strong>ASM Diskgroups</strong><div class="g-hint">DATA, RECO — both ONLINE</div></div></div>
+            <div class="g-check-item g-fail"><span class="g-check-dot"></span><div><strong>Redo Log Switches</strong><div class="g-hint">42/hr — above expected rate</div></div></div>
+          </div>
+        </div>
+
+        <!-- Benchmark mockup -->
+        <div class="gpane" id="g-benchmark">
+          <table class="g-table">
+            <thead><tr><th>Benchmark</th><th>Reps</th><th>Median TPS</th><th>p95 Latency</th><th>CV</th></tr></thead>
+            <tbody>
+              <tr><td>Single Session</td><td>5</td><td class="mono">1,204</td><td class="mono">8.2 ms</td><td class="mono">3.1%</td></tr>
+              <tr><td>CPU Stress</td><td>5</td><td class="mono">842</td><td class="mono">14.7 ms</td><td class="mono">5.4%</td></tr>
+              <tr><td>IO Stress</td><td>3</td><td class="mono">610</td><td class="mono">22.1 ms</td><td class="mono">6.8%</td></tr>
+              <tr><td>Concurrency Ramp</td><td>3</td><td class="mono">2,318</td><td class="mono">11.4 ms</td><td class="mono">4.0%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Block Check mockup -->
+        <div class="gpane" id="g-block">
+          <div class="g-metric-strip">
+            <div class="g-metric-chip"><div class="g-hint">Total Data Corruption</div><div class="g-kpi-value mono">0 blocks</div></div>
+            <div class="g-metric-chip g-metric-warn"><div class="g-hint">Non-Logged Blocks</div><div class="g-kpi-value mono">12 blocks</div></div>
+          </div>
+          <table class="g-table">
+            <thead><tr><th>Datafile</th><th>Tablespace</th><th>Status</th><th>Corrupt</th><th>Non-Logged</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">system01.dbf</td><td>SYSTEM</td><td><span class="g-badge g-badge-ok">Secured</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+              <tr><td class="mono">users01.dbf</td><td>USERS</td><td><span class="g-badge g-badge-ok">Secured</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+              <tr><td class="mono">data07.dbf</td><td>DATA_TBS</td><td><span class="g-badge g-badge-fail">Attention</span></td><td class="mono">—</td><td class="mono">12</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<section id="guardrails" class="guardrails-band">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-kicker">Guardrails</div>
+      <h2>Every risky action asks permission first.</h2>
+      <p>These aren't settings you have to remember to turn on. They're the default, on every connection, every run.</p>
+    </div>
+
+    <div class="guardrails-list reveal">
+      <div class="guardrail-item">
+        <div class="guardrail-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <div>
+          <h3>PROD is hard-blocked</h3>
+          <p>Load tests, benchmarks, heavy jobs, and the transaction simulator all refuse to run against a connection labeled PROD. No override flag.</p>
+        </div>
+      </div>
+      <div class="guardrail-item">
+        <div class="guardrail-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <div>
+          <h3>Writes are opt-in, never silent</h3>
+          <p>Any action capable of DML requires an explicit confirmation. The default is always read-only.</p>
+        </div>
+      </div>
+      <div class="guardrail-item">
+        <div class="guardrail-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <div>
+          <h3>Concurrency is capped</h3>
+          <p>No load test or transaction simulation can spin up unbounded connections against a live instance.</p>
+        </div>
+      </div>
+      <div class="guardrail-item">
+        <div class="guardrail-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <div>
+          <h3>EXPLAIN PLAN before every Heavy Job</h3>
+          <p>A cost-threshold gate runs first. If the plan looks too expensive, the job doesn't start.</p>
+        </div>
+      </div>
+      <div class="guardrail-item">
+        <div class="guardrail-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <div>
+          <h3>License-aware, on purpose</h3>
+          <p>PM Tools never queries a Diagnostics-Pack-licensed view. It only reads a file you already have.</p>
+        </div>
+      </div>
+      <div class="guardrail-item">
+        <div class="guardrail-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <div>
+          <h3>Metrics are labeled honestly</h3>
+          <p>A cumulative counter is never presented as a rate. If a number needs a caveat, the caveat ships with it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="specs">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-kicker">By the numbers</div>
+      <h2>What's actually in the box.</h2>
+    </div>
+    <div class="specs-strip reveal">
+      <div class="spec-cell"><div class="spec-num">15</div><div class="spec-label">locked benchmark definitions</div></div>
+      <div class="spec-cell"><div class="spec-num">8</div><div class="spec-label">gated heavy job templates</div></div>
+      <div class="spec-cell"><div class="spec-num">6</div><div class="spec-label">guardrails on by default</div></div>
+      <div class="spec-cell"><div class="spec-num">1</div><div class="spec-label">connection to configure, once</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="get-started" class="cta-band">
+  <div class="wrap">
+    <h2>Point it at a connection. See what it refuses to do first.</h2>
+    <p>That's usually the fastest way to trust a stress-testing tool — watch it say no before it ever says yes.</p>
+
+    <div class="quickstart reveal">
+      <div class="quickstart-bar">
+        <span class="mono">quick start</span>
+        <button class="copy-btn" id="copyBtn">Copy</button>
+      </div>
+      <pre class="mono" id="quickstartCode">git clone https://github.com/your-org/dbsentry.git
+cd dbsentry
+pip install -r requirements.txt
+python app.py</pre>
+    </div>
+
+    <a class="btn-primary" href="#top">Back to top</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 DBSentry — Performance Platform available now, Data Recovery Platform coming soon</span>
+    <span class="mono">v1.8</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var scenarios = {
+    health: {
+      label: 'dbsentry — health check',
+      lines: [
+        { t: '$ ', c: 'prompt', append: 'dbsentry health-check --connection=PROD_REPLICA\n' },
+        { t: '', c: 'dim', append: 'Connecting… 38.5 ms\n' },
+        { t: '', c: 'ok', append: '✓ FRA usage: 29.5% — healthy\n' },
+        { t: '', c: 'ok', append: '✓ Archive log mode: enabled\n' },
+        { t: '', c: 'warn', append: '⚠ Tablespace ADMIN_TBS: 70.1% used of max\n' },
+        { t: '', c: 'ok', append: '✓ RAC instances: 2/2 online\n' },
+        { t: '', c: 'dim', append: '\n' },
+        { t: '$ ', c: 'prompt', append: '' },
+      ],
+    },
+    blocked: {
+      label: 'dbsentry — benchmark run',
+      lines: [
+        { t: '$ ', c: 'prompt', append: 'dbsentry benchmark run --key=single_session --env=PROD\n' },
+        { t: '', c: 'fail', append: '✗ PROD hard-block: this connection is labeled PROD.\n' },
+        { t: '', c: 'fail', append: '  Benchmarks are disabled against PROD by default.\n' },
+        { t: '', c: 'dim', append: '  No override flag exists. Relabel the connection to proceed.\n' },
+        { t: '', c: 'dim', append: '\n' },
+        { t: '$ ', c: 'prompt', append: '' },
+      ],
+    },
+    heavyjob: {
+      label: 'dbsentry — heavy job',
+      lines: [
+        { t: '$ ', c: 'prompt', append: 'dbsentry heavyjob run --key=full_table_scan --scale=10\n' },
+        { t: '', c: 'dim', append: 'Running EXPLAIN PLAN pre-flight…\n' },
+        { t: '', c: 'warn', append: '⚠ Estimated cost: 184,220 (threshold: 50,000)\n' },
+        { t: '', c: 'fail', append: '✗ Cost gate failed. Job will not run.\n' },
+        { t: '', c: 'dim', append: '  Lower --scale or raise the cost threshold to proceed.\n' },
+        { t: '', c: 'dim', append: '\n' },
+        { t: '$ ', c: 'prompt', append: '' },
+      ],
+    },
+  };
+
+  var el = document.getElementById('termBody');
+  var labelEl = document.getElementById('termLabel');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var typingToken = 0;
+
+  function renderStatic(lines) {
+    el.innerHTML = '';
+    lines.forEach(function (l) {
+      var span = document.createElement('span');
+      span.className = l.c;
+      span.textContent = l.t + l.append;
+      el.appendChild(span);
+    });
+    var caret = document.createElement('span');
+    caret.className = 'caret';
+    el.appendChild(caret);
+  }
+
+  function playScenario(key) {
+    var scenario = scenarios[key];
+    labelEl.textContent = scenario.label;
+    typingToken++;
+    var myToken = typingToken;
+
+    if (reduced) { renderStatic(scenario.lines); return; }
+
+    var flatText = scenario.lines.map(function (l) { return { c: l.c, text: l.t + l.append }; });
+    var li = 0, ci = 0;
+    el.textContent = '';
+
+    function typeNext() {
+      if (myToken !== typingToken) return; // a newer scenario was selected — abandon this run
+      if (li >= flatText.length) {
+        var caret = document.createElement('span');
+        caret.className = 'caret';
+        el.appendChild(caret);
+        return;
+      }
+      var current = flatText[li];
+      if (ci === 0) {
+        var span = document.createElement('span');
+        span.className = current.c;
+        span.dataset.building = 'true';
+        el.appendChild(span);
+      }
+      var activeSpan = el.querySelector('span[data-building="true"]');
+      activeSpan.textContent += current.text[ci];
+      ci++;
+      if (ci >= current.text.length) {
+        activeSpan.removeAttribute('data-building');
+        li++; ci = 0;
+        setTimeout(typeNext, current.text.trim() === '' ? 80 : 18);
+      } else {
+        setTimeout(typeNext, 14);
+      }
+    }
+    setTimeout(typeNext, 120);
+  }
+
+  document.querySelectorAll('.tscenario').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.tscenario').forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      playScenario(btn.getAttribute('data-scenario'));
+    });
+  });
+
+  setTimeout(function () { playScenario('health'); }, 400);
+})();
+
+(function () {
+  var tabs = document.querySelectorAll('.gtab');
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var target = tab.getAttribute('data-target');
+      tabs.forEach(function (t) {
+        t.classList.remove('is-active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('is-active');
+      tab.setAttribute('aria-selected', 'true');
+      document.querySelectorAll('.gpane').forEach(function (pane) {
+        pane.classList.toggle('is-active', pane.id === target);
+      });
+    });
+  });
+})();
+
+(function () {
+  var burger = document.getElementById('navBurger');
+  var mobileNav = document.getElementById('mobileNav');
+  if (!burger || !mobileNav) return;
+  burger.addEventListener('click', function () {
+    var isOpen = mobileNav.classList.toggle('is-open');
+    burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+  mobileNav.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', function () {
+      mobileNav.classList.remove('is-open');
+      burger.setAttribute('aria-expanded', 'false');
+    });
+  });
+})();
+
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var targets = document.querySelectorAll('.reveal');
+  if (reduced || !('IntersectionObserver' in window)) {
+    targets.forEach(function (t) { t.classList.add('is-visible'); });
+    return;
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+  targets.forEach(function (t) { observer.observe(t); });
+})();
+
+(function () {
+  var btn = document.getElementById('copyBtn');
+  var code = document.getElementById('quickstartCode');
+  if (!btn || !code) return;
+  btn.addEventListener('click', function () {
+    var text = code.textContent;
+    var done = function () {
+      var original = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.classList.add('is-copied');
+      setTimeout(function () {
+        btn.textContent = original;
+        btn.classList.remove('is-copied');
+      }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text, done); });
+    } else {
+      fallbackCopy(text, done);
+    }
+  });
+  function fallbackCopy(text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    done();
+  }
+})();
+</script>
+
+</body>
+</html>
